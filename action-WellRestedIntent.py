@@ -12,20 +12,29 @@ def action_wrapper(hermes, intent_message):
         return
 
     number_of_hours = int(intent_message.slots["NumberOfHours"].first().value)
-    response = '{} hours slept. '.format(number_of_hours)
 
     if intent_message.slots["SleepQuality"]:
         sleep_quality = intent_message.slots["SleepQuality"].first().value
-        response += 'Sleep Quality was {}. '.format(sleep_quality)
+
+        good = ("good", "well", "wonderfully", "a lot",
+                "amazing", "fantastic", "great", "not bad")
+        bad = ("bad", "poorly", "little", "very little", "not at all")
+
+        if sleep_quality in good:
+            number_of_hours += 1
+            response = "You slept well last night, and "
+        if sleep_quality in bad:
+            number_of_hours -= 1
+            response = "You slept poorly last night, and "
 
     if number_of_hours > 12:
-        response = "I think you may sleep too much and swing back to tired."
+        response += "I think you may sleep too much and swing back to tired."
     elif number_of_hours > 8:
-        response = "You should wake up refreshed."
+        response += "You should wake up refreshed."
     elif number_of_hours > 6:
-        response = "You may get by, but watch out for a mid-day crash."
+        response += "You may get by, but watch out for a mid-day crash."
     else:
-        response = "You'll be dragging. Get the coffee ready!"
+        response += "You'll be dragging. Get the coffee ready!"
 
     hermes.publish_end_session(current_session_id, response)
 
